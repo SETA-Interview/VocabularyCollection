@@ -1,0 +1,1 @@
+A Spring Boot application to manage collections of vocabularies
