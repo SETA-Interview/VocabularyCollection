@@ -10,6 +10,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.UUID;
 
 public interface CollectionRepository extends JpaRepository<Collection, UUID> {
-	Page<Collection> findAllByNameContainingIgnoreCaseAndUserId(@Size(max = 100) @NotEmpty String name, String userId, Pageable pageable);
-	Page<Collection> findAllByUserId(String userId, Pageable pageable);
+	Page<Collection> findAllByNameContainingIgnoreCaseAndUserId(@Size(max = 100) @NotEmpty String name, UUID userId, Pageable pageable);
+	Page<Collection> findAllByUserId(UUID userId, Pageable pageable);
 }

@@ -13,7 +13,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="description" type="VARCHAR(1024)"/>
-            <column name="user_id" type="VARCHAR(255)"/>
+            <column name="user_id" type="UUID"/>
         </createTable>
     </changeSet>
     <changeSet id="1726990979491-2" author="duyvu">

@@ -3,9 +3,12 @@ package org.example.collection.vocabulary.controller;
 import lombok.RequiredArgsConstructor;
 import org.example.collection.vocabulary.model.request.CollectionCreateRequest;
 import org.example.collection.vocabulary.model.request.CollectionUpdateRequest;
+import org.example.collection.vocabulary.model.request.VocabularyCreateRequest;
 import org.example.collection.vocabulary.model.response.CollectionResponse;
 import org.example.collection.vocabulary.model.response.PageResponse;
+import org.example.collection.vocabulary.model.response.VocabularyResponse;
 import org.example.collection.vocabulary.service.CollectionService;
+import org.example.collection.vocabulary.service.VocabularyService;
 import org.example.collection.vocabulary.utils.ContextUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,12 +25,13 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.UUID;
 
 @RestController
-@RequestMapping
+@RequestMapping("collections")
 @RequiredArgsConstructor
 public class CollectionController {
 	private final CollectionService collectionService;
+	private final VocabularyService vocabularyService;
 
-	@GetMapping("collections")
+	@GetMapping
 	@PreAuthorize("hasAnyAuthority('Viewer', 'Admin')")
 	public ResponseEntity<PageResponse<CollectionResponse>> findAll(@RequestParam(name = "page-size") int pageSize,
 																	@RequestParam(name = "page-number") int pageNumber) {
@@ -35,38 +39,62 @@ public class CollectionController {
 														   ContextUtils.extractUserIdFromSecurityContext()));
 	}
 
-	@GetMapping("collections/{collection-id}")
+	@GetMapping("/{collection-id}")
 	@PreAuthorize("hasAnyAuthority('Viewer', 'Admin')")
 	public ResponseEntity<CollectionResponse> findById(@PathVariable(name = "collection-id") UUID collectionId) {
 		return ResponseEntity.ok(collectionService.findById(collectionId));
 	}
 
-	@PostMapping("collections")
+	@PostMapping
 	@PreAuthorize("hasAnyAuthority('Admin')")
-	public ResponseEntity<Void> save(@RequestBody CollectionCreateRequest request) {
-		collectionService.save(request, ContextUtils.extractUserIdFromSecurityContext());
-		return ResponseEntity.ok().build();
+	public ResponseEntity<UUID> save(@RequestBody CollectionCreateRequest request) {
+		return ResponseEntity.ok().body(collectionService.save(request));
 	}
 
-	@PutMapping("collections")
+	@PutMapping
 	@PreAuthorize("hasAnyAuthority('Admin')")
-	public ResponseEntity<Void> update(@RequestBody CollectionUpdateRequest request) {
-		collectionService.update(request);
-		return ResponseEntity.ok().build();
+	public ResponseEntity<UUID> update(@RequestBody CollectionUpdateRequest request) {
+		return ResponseEntity.ok().body(collectionService.update(request));
 	}
 
-	@DeleteMapping("collections/{collection-id}")
+	@DeleteMapping("/{collection-id}")
 	@PreAuthorize("hasAnyAuthority('Admin')")
 	public ResponseEntity<Void> deleteById(@PathVariable(name = "collection-id") UUID collectionId) {
 		collectionService.delete(collectionId);
 		return ResponseEntity.ok().build();
 	}
 
-	@GetMapping("collections/name")
+	@GetMapping("/name")
 	@PreAuthorize("hasAnyAuthority('Viewer', 'Admin')")
 	public ResponseEntity<PageResponse<CollectionResponse>> findByName(@RequestParam(name = "page-size") int pageSize,
-															   @RequestParam(name = "page-number") int pageNumber,
-															   @RequestParam(name = "name") String name) {
+																	   @RequestParam(name = "page-number") int pageNumber,
+																	   @RequestParam(name = "name") String name) {
 		return ResponseEntity.ok(collectionService.findByName(pageNumber, pageSize, ContextUtils.extractUserIdFromSecurityContext(), name));
+	}
+
+	@PostMapping("/{collection-id}/vocabularies")
+	@PreAuthorize("hasAnyAuthority('Admin')")
+	public ResponseEntity<UUID> saveVocabularyInCollection(@PathVariable("collection-id") UUID collectionId,
+														   @RequestBody VocabularyCreateRequest request) {
+		return ResponseEntity.ok().body(vocabularyService.save(request, collectionId));
+	}
+
+	@GetMapping("/{collection-id}/vocabularies/name")
+	@PreAuthorize("hasAnyAuthority('Viewer', 'Admin')")
+	public ResponseEntity<PageResponse<VocabularyResponse>> findAllVocabulariesInCollectionByName(
+			@PathVariable("collection-id") UUID collectionId,
+			@RequestParam(name = "page-size") int pageSize,
+			@RequestParam(name = "page-number") int pageNumber,
+			@RequestParam(name = "name") String name) {
+		return ResponseEntity.ok(vocabularyService.findByName(pageNumber, pageSize, name, collectionId));
+	}
+
+	@GetMapping("/{collection-id}/vocabularies")
+	@PreAuthorize("hasAnyAuthority('Viewer', 'Admin')")
+	public ResponseEntity<PageResponse<VocabularyResponse>> findAllVocabulariesInCollection(
+			@PathVariable("collection-id") UUID collectionId,
+			@RequestParam(name = "page-size") int pageSize,
+			@RequestParam(name = "page-number") int pageNumber) {
+		return ResponseEntity.ok(vocabularyService.findAll(pageNumber, pageSize, collectionId));
 	}
 }

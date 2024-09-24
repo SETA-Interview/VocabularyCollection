@@ -3,6 +3,7 @@ package org.example.collection.vocabulary.entity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -15,6 +16,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.Set;
 import java.util.UUID;
@@ -26,6 +29,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 public class Collection {
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
@@ -42,7 +46,8 @@ public class Collection {
 	private String description;
 
 	@Column(name = "user_id")
-	private String userId;
+	@CreatedBy
+	private UUID userId;
 
 	@OneToMany(mappedBy = "collection", cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<Vocabulary> vocabularies;

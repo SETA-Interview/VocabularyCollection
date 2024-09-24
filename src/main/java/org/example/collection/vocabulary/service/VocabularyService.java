@@ -12,9 +12,9 @@ public interface VocabularyService {
 
 	PageResponse<VocabularyResponse> findAll(int pageNumber, int pageSize, UUID collectionId);
 
-	void save(VocabularyCreateRequest request, UUID collectionId);
+	UUID save(VocabularyCreateRequest request, UUID collectionId);
 
-	void update(VocabularyUpdateRequest request);
+	UUID update(VocabularyUpdateRequest request);
 
 	void delete(UUID id);
 

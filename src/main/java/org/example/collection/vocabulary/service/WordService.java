@@ -12,9 +12,9 @@ public interface WordService {
 
 	PageResponse<WordResponse> findAll(int pageNumber, int pageSize, UUID collectionId);
 
-	void save(WordCreateRequest request, UUID vocabularyId);
+	UUID save(WordCreateRequest request, UUID vocabularyId);
 
-	void update(WordUpdateRequest request);
+	UUID update(WordUpdateRequest request);
 
 	void delete(UUID id);
 

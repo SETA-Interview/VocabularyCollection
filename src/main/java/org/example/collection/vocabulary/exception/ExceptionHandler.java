@@ -14,9 +14,9 @@ import java.time.Instant;
 @ControllerAdvice
 @Slf4j
 public class ExceptionHandler extends ResponseEntityExceptionHandler {
-	@org.springframework.web.bind.annotation.ExceptionHandler(value = {InvalidRequestParamException.class})
-	protected ResponseEntity<ErrorResponse> handleInvalidRequestParamException(final InvalidRequestParamException ex,
-																			   final WebRequest request) {
+	@org.springframework.web.bind.annotation.ExceptionHandler(value = {ResourceNotFoundException.class})
+	protected ResponseEntity<ErrorResponse> handleResourceNotFoundException(final ResourceNotFoundException ex,
+																			final WebRequest request) {
 		log.error("IO Exception ", ex);
 		return ResponseEntity.status(400)
 							 .contentType(MediaType.APPLICATION_JSON)

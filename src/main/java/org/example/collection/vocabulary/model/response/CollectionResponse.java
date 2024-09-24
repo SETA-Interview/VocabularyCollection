@@ -18,5 +18,5 @@ public class CollectionResponse {
 	private String description;
 
 	@JsonProperty("user_id")
-	private String userId;
+	private UUID userId;
 }

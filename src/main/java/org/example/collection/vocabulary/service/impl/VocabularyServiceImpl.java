@@ -3,7 +3,7 @@ package org.example.collection.vocabulary.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.example.collection.vocabulary.entity.Collection;
 import org.example.collection.vocabulary.entity.Vocabulary;
-import org.example.collection.vocabulary.exception.InvalidRequestParamException;
+import org.example.collection.vocabulary.exception.ResourceNotFoundException;
 import org.example.collection.vocabulary.model.request.VocabularyCreateRequest;
 import org.example.collection.vocabulary.model.request.VocabularyUpdateRequest;
 import org.example.collection.vocabulary.model.response.PageResponse;
@@ -26,7 +26,7 @@ public class VocabularyServiceImpl implements VocabularyService {
 	@Override
 	public VocabularyResponse findById(UUID id) {
 		return VocabularyResponseMapper.INSTANCE.map(vocabularyRepository.findById(id)
-																		 .orElseThrow(() -> new InvalidRequestParamException(
+																		 .orElseThrow(() -> new ResourceNotFoundException(
 																				 "Vocabulary with id " + id + " not found")));
 	}
 
@@ -38,20 +38,20 @@ public class VocabularyServiceImpl implements VocabularyService {
 
 	@Override
 	@Transactional
-	public void save(VocabularyCreateRequest request, UUID collectionId) {
+	public UUID save(VocabularyCreateRequest request, UUID collectionId) {
 		Vocabulary vocabulary = VocabularyRequestMapper.INSTANCE.map(request);
 		vocabulary.setCollection(Collection.builder().id(collectionId).build());
-		vocabularyRepository.save(vocabulary);
+		return vocabularyRepository.save(vocabulary).getId();
 	}
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public void update(VocabularyUpdateRequest request) {
+	public UUID update(VocabularyUpdateRequest request) {
 		Vocabulary vocabulary = vocabularyRepository.findById(request.getId()).orElseThrow(
-				() -> new InvalidRequestParamException("Vocabulary with id " + request.getId() + " not found"));
+				() -> new ResourceNotFoundException("Vocabulary with id " + request.getId() + " not found"));
 		vocabulary.setDescription(request.getDescription());
 		vocabulary.setName(request.getName());
-		vocabularyRepository.save(vocabulary);
+		return vocabularyRepository.save(vocabulary).getId();
 	}
 
 	@Override

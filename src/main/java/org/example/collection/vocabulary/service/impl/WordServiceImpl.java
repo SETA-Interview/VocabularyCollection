@@ -3,7 +3,7 @@ package org.example.collection.vocabulary.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.example.collection.vocabulary.entity.Vocabulary;
 import org.example.collection.vocabulary.entity.Word;
-import org.example.collection.vocabulary.exception.InvalidRequestParamException;
+import org.example.collection.vocabulary.exception.ResourceNotFoundException;
 import org.example.collection.vocabulary.model.request.WordCreateRequest;
 import org.example.collection.vocabulary.model.request.WordUpdateRequest;
 import org.example.collection.vocabulary.model.response.PageResponse;
@@ -26,7 +26,7 @@ public class WordServiceImpl implements WordService {
 	public WordResponse findById(UUID id) {
 		return WordResponseMapper.INSTANCE.map(
 				wordRepository.findById(id)
-							  .orElseThrow(() -> new InvalidRequestParamException("Word with id " + id + "not found ")));
+							  .orElseThrow(() -> new ResourceNotFoundException("Word with id " + id + "not found ")));
 	}
 
 	@Override
@@ -35,20 +35,20 @@ public class WordServiceImpl implements WordService {
 	}
 
 	@Override
-	public void save(WordCreateRequest request, UUID vocabularyId) {
+	public UUID save(WordCreateRequest request, UUID vocabularyId) {
 		Word word = WordRequestMapper.INSTANCE.map(request);
 		word.setVocabulary(Vocabulary.builder().id(vocabularyId).build());
-		wordRepository.save(word);
+		return wordRepository.save(word).getId();
 	}
 
 	@Override
-	public void update(WordUpdateRequest request) {
+	public UUID update(WordUpdateRequest request) {
 		Word word = wordRepository.findById(request.getId()).orElseThrow(
-				() -> new InvalidRequestParamException("Word with id " + request.getId() + " not found"));
+				() -> new ResourceNotFoundException("Word with id " + request.getId() + " not found"));
 		word.setDescription(request.getDescription());
 		word.setContent(request.getContent());
 		word.setLocale(request.getLocale());
-		wordRepository.save(word);
+		return wordRepository.save(word).getId();
 	}
 
 	@Override

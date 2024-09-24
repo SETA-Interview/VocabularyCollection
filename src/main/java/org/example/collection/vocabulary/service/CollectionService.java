@@ -12,9 +12,9 @@ public interface CollectionService {
 
 	PageResponse<CollectionResponse> findAll(int pageNumber, int pageSize, UUID userId);
 
-	void save(CollectionCreateRequest request, UUID userId);
+	UUID save(CollectionCreateRequest request);
 
-	void update(CollectionUpdateRequest request);
+	UUID update(CollectionUpdateRequest request);
 
 	void delete(UUID id);
 

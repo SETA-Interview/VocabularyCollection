@@ -2,7 +2,7 @@ package org.example.collection.vocabulary.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.example.collection.vocabulary.entity.Collection;
-import org.example.collection.vocabulary.exception.InvalidRequestParamException;
+import org.example.collection.vocabulary.exception.ResourceNotFoundException;
 import org.example.collection.vocabulary.model.request.CollectionCreateRequest;
 import org.example.collection.vocabulary.model.request.CollectionUpdateRequest;
 import org.example.collection.vocabulary.model.response.CollectionResponse;
@@ -26,33 +26,32 @@ public class CollectionServiceImpl implements CollectionService {
 	public CollectionResponse findById(UUID id) {
 		return CollectionResponseMapper.INSTANCE.map(
 				collectionRepository.findById(id)
-									.orElseThrow(() -> new InvalidRequestParamException("Collection with id " + id + "not found ")));
+									.orElseThrow(() -> new ResourceNotFoundException("Collection with id " + id + "not found ")));
 	}
 
 	@Override
 	public PageResponse<CollectionResponse> findAll(int pageNumber, int pageSize, UUID userId) {
-		return CollectionResponseMapper.INSTANCE.map(collectionRepository.findAllByUserId(userId.toString(), PageRequest.of(pageNumber,
+		return CollectionResponseMapper.INSTANCE.map(collectionRepository.findAllByUserId(userId, PageRequest.of(pageNumber,
 																															pageSize)));
 	}
 
 	@Override
 	@Transactional
-	public void save(CollectionCreateRequest request, UUID userId) {
+	public UUID save(CollectionCreateRequest request) {
 		Collection collection = CollectionRequestMapper.INSTANCE.map(request);
-		collection.setUserId(userId.toString());
-		collectionRepository.save(collection);
+		return collectionRepository.save(collection).getId();
 	}
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public void update(CollectionUpdateRequest request) {
+	public UUID update(CollectionUpdateRequest request) {
 		Collection collection = collectionRepository.findById(request.getId())
-													.orElseThrow(() -> new InvalidRequestParamException(
+													.orElseThrow(() -> new ResourceNotFoundException(
 															"Collection with id " + request.getId() + "not found "));
 
 		collection.setName(request.getName());
 		collection.setDescription(request.getDescription());
-		collectionRepository.save(collection);
+		return collectionRepository.save(collection).getId();
 	}
 
 	@Override
@@ -63,7 +62,6 @@ public class CollectionServiceImpl implements CollectionService {
 	@Override
 	public PageResponse<CollectionResponse> findByName(int pageNumber, int pageSize, UUID userId, String name) {
 		return CollectionResponseMapper.INSTANCE.map(
-				collectionRepository.findAllByNameContainingIgnoreCaseAndUserId(name, userId.toString(), PageRequest.of(pageNumber,
-																														pageSize)));
+				collectionRepository.findAllByNameContainingIgnoreCaseAndUserId(name, userId, PageRequest.of(pageNumber, pageSize)));
 	}
 }
