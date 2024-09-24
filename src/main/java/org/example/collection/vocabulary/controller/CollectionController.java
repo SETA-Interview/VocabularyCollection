@@ -10,6 +10,7 @@ import org.example.collection.vocabulary.model.response.VocabularyResponse;
 import org.example.collection.vocabulary.service.CollectionService;
 import org.example.collection.vocabulary.service.VocabularyService;
 import org.example.collection.vocabulary.utils.ContextUtils;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,10 +34,9 @@ public class CollectionController {
 
 	@GetMapping
 	@PreAuthorize("hasAnyAuthority('Viewer', 'Admin')")
-	public ResponseEntity<PageResponse<CollectionResponse>> findAll(@RequestParam(name = "page-size") int pageSize,
-																	@RequestParam(name = "page-number") int pageNumber) {
-		return ResponseEntity.ok(collectionService.findAll(pageNumber, pageSize,
-														   ContextUtils.extractUserIdFromSecurityContext()));
+	public ResponseEntity<PageResponse<CollectionResponse>> findAll(@RequestParam(name = "name", required = false) String name,
+																	Pageable pageable) {
+		return ResponseEntity.ok(collectionService.findAll(pageable, ContextUtils.extractUserIdFromSecurityContext(), name));
 	}
 
 	@GetMapping("/{collection-id}")
@@ -64,14 +64,6 @@ public class CollectionController {
 		return ResponseEntity.ok().build();
 	}
 
-	@GetMapping("/name")
-	@PreAuthorize("hasAnyAuthority('Viewer', 'Admin')")
-	public ResponseEntity<PageResponse<CollectionResponse>> findByName(@RequestParam(name = "page-size") int pageSize,
-																	   @RequestParam(name = "page-number") int pageNumber,
-																	   @RequestParam(name = "name") String name) {
-		return ResponseEntity.ok(collectionService.findByName(pageNumber, pageSize, ContextUtils.extractUserIdFromSecurityContext(), name));
-	}
-
 	@PostMapping("/{collection-id}/vocabularies")
 	@PreAuthorize("hasAnyAuthority('Admin')")
 	public ResponseEntity<UUID> saveVocabularyInCollection(@PathVariable("collection-id") UUID collectionId,
@@ -79,22 +71,11 @@ public class CollectionController {
 		return ResponseEntity.ok().body(vocabularyService.save(request, collectionId));
 	}
 
-	@GetMapping("/{collection-id}/vocabularies/name")
-	@PreAuthorize("hasAnyAuthority('Viewer', 'Admin')")
-	public ResponseEntity<PageResponse<VocabularyResponse>> findAllVocabulariesInCollectionByName(
-			@PathVariable("collection-id") UUID collectionId,
-			@RequestParam(name = "page-size") int pageSize,
-			@RequestParam(name = "page-number") int pageNumber,
-			@RequestParam(name = "name") String name) {
-		return ResponseEntity.ok(vocabularyService.findByName(pageNumber, pageSize, name, collectionId));
-	}
-
 	@GetMapping("/{collection-id}/vocabularies")
 	@PreAuthorize("hasAnyAuthority('Viewer', 'Admin')")
 	public ResponseEntity<PageResponse<VocabularyResponse>> findAllVocabulariesInCollection(
-			@PathVariable("collection-id") UUID collectionId,
-			@RequestParam(name = "page-size") int pageSize,
-			@RequestParam(name = "page-number") int pageNumber) {
-		return ResponseEntity.ok(vocabularyService.findAll(pageNumber, pageSize, collectionId));
+			@PathVariable("collection-id") UUID collectionId, @RequestParam(name = "name", required = false) String name,
+			Pageable pageable) {
+		return ResponseEntity.ok(vocabularyService.findAll(pageable, collectionId, name));
 	}
 }

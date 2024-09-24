@@ -36,7 +36,7 @@ public class WordController {
 
 	@DeleteMapping("/{word-id}")
 	@PreAuthorize("hasAnyAuthority('Admin')")
-	public ResponseEntity<Void> update(@PathVariable("word-id") UUID wordId) {
+	public ResponseEntity<Void> deleteById(@PathVariable("word-id") UUID wordId) {
 		wordService.delete(wordId);
 		return ResponseEntity.ok().build();
 	}

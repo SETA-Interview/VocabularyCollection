@@ -2,7 +2,9 @@ package org.example.collection.vocabulary.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.example.collection.vocabulary.entity.Vocabulary;
+import org.example.collection.vocabulary.entity.Vocabulary_;
 import org.example.collection.vocabulary.entity.Word;
+import org.example.collection.vocabulary.entity.Word_;
 import org.example.collection.vocabulary.exception.ResourceNotFoundException;
 import org.example.collection.vocabulary.model.request.WordCreateRequest;
 import org.example.collection.vocabulary.model.request.WordUpdateRequest;
@@ -12,10 +14,13 @@ import org.example.collection.vocabulary.repository.WordRepository;
 import org.example.collection.vocabulary.service.WordService;
 import org.example.collection.vocabulary.utils.mapper.WordRequestMapper;
 import org.example.collection.vocabulary.utils.mapper.WordResponseMapper;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
+
+import static org.example.collection.vocabulary.utils.specification.SpecificationBuilder.equalManyToOne;
+import static org.example.collection.vocabulary.utils.specification.SpecificationBuilder.likeIgnoreCase;
 
 @Service
 @RequiredArgsConstructor
@@ -30,8 +35,11 @@ public class WordServiceImpl implements WordService {
 	}
 
 	@Override
-	public PageResponse<WordResponse> findAll(int pageNumber, int pageSize, UUID vocabularyId) {
-		return WordResponseMapper.INSTANCE.map(wordRepository.findAllByVocabularyId(vocabularyId, PageRequest.of(pageNumber, pageSize)));
+	public PageResponse<WordResponse> findAll(Pageable pageable, UUID vocabularyId, String content) {
+		return WordResponseMapper.INSTANCE.map(
+				wordRepository.findAll(
+						equalManyToOne(Word_.vocabulary, Vocabulary_.id, vocabularyId).and(likeIgnoreCase(Word_.content, content)),
+						pageable));
 	}
 
 	@Override
@@ -54,12 +62,5 @@ public class WordServiceImpl implements WordService {
 	@Override
 	public void delete(UUID id) {
 		wordRepository.deleteById(id);
-	}
-
-	@Override
-	public PageResponse<WordResponse> findByContent(int pageNumber, int pageSize, UUID vocabularyId, String content) {
-		return WordResponseMapper.INSTANCE.map(
-				wordRepository.findAllByVocabularyIdAndContentContainingIgnoreCase(vocabularyId, content, PageRequest.of(pageNumber,
-																														 pageSize)));
 	}
 }

@@ -2,6 +2,7 @@ package org.example.collection.vocabulary.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.example.collection.vocabulary.entity.Collection;
+import org.example.collection.vocabulary.entity.Collection_;
 import org.example.collection.vocabulary.exception.ResourceNotFoundException;
 import org.example.collection.vocabulary.model.request.CollectionCreateRequest;
 import org.example.collection.vocabulary.model.request.CollectionUpdateRequest;
@@ -11,11 +12,14 @@ import org.example.collection.vocabulary.repository.CollectionRepository;
 import org.example.collection.vocabulary.service.CollectionService;
 import org.example.collection.vocabulary.utils.mapper.CollectionRequestMapper;
 import org.example.collection.vocabulary.utils.mapper.CollectionResponseMapper;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
+
+import static org.example.collection.vocabulary.utils.specification.SpecificationBuilder.equal;
+import static org.example.collection.vocabulary.utils.specification.SpecificationBuilder.likeIgnoreCase;
 
 @Service
 @RequiredArgsConstructor
@@ -30,9 +34,9 @@ public class CollectionServiceImpl implements CollectionService {
 	}
 
 	@Override
-	public PageResponse<CollectionResponse> findAll(int pageNumber, int pageSize, UUID userId) {
-		return CollectionResponseMapper.INSTANCE.map(collectionRepository.findAllByUserId(userId, PageRequest.of(pageNumber,
-																															pageSize)));
+	public PageResponse<CollectionResponse> findAll(Pageable pageable, UUID userId, String name) {
+		return CollectionResponseMapper.INSTANCE.map(
+				collectionRepository.findAll(equal(Collection_.userId, userId).and(likeIgnoreCase(Collection_.name, name)), pageable));
 	}
 
 	@Override
@@ -57,11 +61,5 @@ public class CollectionServiceImpl implements CollectionService {
 	@Override
 	public void delete(UUID id) {
 		collectionRepository.deleteById(id);
-	}
-
-	@Override
-	public PageResponse<CollectionResponse> findByName(int pageNumber, int pageSize, UUID userId, String name) {
-		return CollectionResponseMapper.INSTANCE.map(
-				collectionRepository.findAllByNameContainingIgnoreCaseAndUserId(name, userId, PageRequest.of(pageNumber, pageSize)));
 	}
 }

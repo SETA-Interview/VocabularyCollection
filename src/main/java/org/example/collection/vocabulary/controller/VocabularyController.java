@@ -8,6 +8,7 @@ import org.example.collection.vocabulary.model.response.VocabularyResponse;
 import org.example.collection.vocabulary.model.response.WordResponse;
 import org.example.collection.vocabulary.service.VocabularyService;
 import org.example.collection.vocabulary.service.WordService;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -50,21 +51,13 @@ public class VocabularyController {
 		return ResponseEntity.ok().build();
 	}
 
-	@GetMapping("/{vocabulary-id}/words/content")
-	@PreAuthorize("hasAnyAuthority('Viewer', 'Admin')")
-	public ResponseEntity<PageResponse<WordResponse>> findAllWordsInVocabularyByContent(@PathVariable("vocabulary-id") UUID vocabularyId,
-																						@RequestParam(name = "page-size") int pageSize,
-																						@RequestParam(name = "page-number") int pageNumber,
-																						@RequestParam(name = "content") String content) {
-		return ResponseEntity.ok(wordService.findByContent(pageNumber, pageSize, vocabularyId, content));
-	}
-
 	@GetMapping("/{vocabulary-id}/words")
 	@PreAuthorize("hasAnyAuthority('Viewer', 'Admin')")
 	public ResponseEntity<PageResponse<WordResponse>> findAllWordsInVocabulary(@PathVariable("vocabulary-id") UUID vocabularyId,
-																			   @RequestParam(name = "page-size") int pageSize,
-																			   @RequestParam(name = "page-number") int pageNumber) {
-		return ResponseEntity.ok(wordService.findAll(pageNumber, pageSize, vocabularyId));
+																			   @RequestParam(name = "content",
+																							 required = false) String content,
+																			   Pageable pageable) {
+		return ResponseEntity.ok(wordService.findAll(pageable, vocabularyId, content));
 	}
 
 	@PostMapping("/{vocabulary-id}/words")

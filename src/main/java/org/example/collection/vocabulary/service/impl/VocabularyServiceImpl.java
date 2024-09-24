@@ -2,7 +2,9 @@ package org.example.collection.vocabulary.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.example.collection.vocabulary.entity.Collection;
+import org.example.collection.vocabulary.entity.Collection_;
 import org.example.collection.vocabulary.entity.Vocabulary;
+import org.example.collection.vocabulary.entity.Vocabulary_;
 import org.example.collection.vocabulary.exception.ResourceNotFoundException;
 import org.example.collection.vocabulary.model.request.VocabularyCreateRequest;
 import org.example.collection.vocabulary.model.request.VocabularyUpdateRequest;
@@ -12,11 +14,14 @@ import org.example.collection.vocabulary.repository.VocabularyRepository;
 import org.example.collection.vocabulary.service.VocabularyService;
 import org.example.collection.vocabulary.utils.mapper.VocabularyRequestMapper;
 import org.example.collection.vocabulary.utils.mapper.VocabularyResponseMapper;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
+
+import static org.example.collection.vocabulary.utils.specification.SpecificationBuilder.equalManyToOne;
+import static org.example.collection.vocabulary.utils.specification.SpecificationBuilder.likeIgnoreCase;
 
 @Service
 @RequiredArgsConstructor
@@ -31,9 +36,11 @@ public class VocabularyServiceImpl implements VocabularyService {
 	}
 
 	@Override
-	public PageResponse<VocabularyResponse> findAll(int pageNumber, int pageSize, UUID collectionId) {
-		return VocabularyResponseMapper.INSTANCE.map(vocabularyRepository.findAllByCollectionId(collectionId, PageRequest.of(pageNumber,
-																															 pageSize)));
+	public PageResponse<VocabularyResponse> findAll(Pageable pageable, UUID collectionId, String name) {
+		return VocabularyResponseMapper.INSTANCE.map(
+				vocabularyRepository.findAll(
+						equalManyToOne(Vocabulary_.collection, Collection_.id, collectionId).and(likeIgnoreCase(Vocabulary_.name, name)),
+						pageable));
 	}
 
 	@Override
@@ -57,12 +64,5 @@ public class VocabularyServiceImpl implements VocabularyService {
 	@Override
 	public void delete(UUID id) {
 		vocabularyRepository.deleteById(id);
-	}
-
-	@Override
-	public PageResponse<VocabularyResponse> findByName(int pageNumber, int pageSize, String name, UUID collectionId) {
-		return VocabularyResponseMapper.INSTANCE.map(
-				vocabularyRepository.findAllByNameContainingIgnoreCaseAndCollectionId(name, collectionId, PageRequest.of(pageNumber,
-																														 pageSize)));
 	}
 }
