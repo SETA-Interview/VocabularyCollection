@@ -15,6 +15,6 @@ public class ContextUtils {
 		if (authentication instanceof JwtAuthenticationToken token) {
 			return UUID.fromString(token.getName());
 		}
-		return null;
+		throw new IllegalStateException("Authentication is not a JWT token");
 	}
 }

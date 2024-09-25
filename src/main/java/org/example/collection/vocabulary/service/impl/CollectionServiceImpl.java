@@ -4,8 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.collection.vocabulary.entity.Collection;
 import org.example.collection.vocabulary.entity.Collection_;
 import org.example.collection.vocabulary.exception.ResourceNotFoundException;
-import org.example.collection.vocabulary.model.request.CollectionCreateRequest;
-import org.example.collection.vocabulary.model.request.CollectionUpdateRequest;
+import org.example.collection.vocabulary.model.request.CollectionRequest;
 import org.example.collection.vocabulary.model.response.CollectionResponse;
 import org.example.collection.vocabulary.model.response.PageResponse;
 import org.example.collection.vocabulary.repository.CollectionRepository;
@@ -41,14 +40,14 @@ public class CollectionServiceImpl implements CollectionService {
 
 	@Override
 	@Transactional
-	public UUID save(CollectionCreateRequest request) {
+	public UUID save(CollectionRequest request) {
 		Collection collection = CollectionRequestMapper.INSTANCE.map(request);
 		return collectionRepository.save(collection).getId();
 	}
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public UUID update(CollectionUpdateRequest request) {
+	public UUID update(CollectionRequest request) {
 		Collection collection = collectionRepository.findById(request.getId())
 													.orElseThrow(() -> new ResourceNotFoundException(
 															"Collection with id " + request.getId() + "not found "));

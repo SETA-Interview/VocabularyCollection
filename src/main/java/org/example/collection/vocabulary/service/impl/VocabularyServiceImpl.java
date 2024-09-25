@@ -1,13 +1,11 @@
 package org.example.collection.vocabulary.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.example.collection.vocabulary.entity.Collection;
 import org.example.collection.vocabulary.entity.Collection_;
 import org.example.collection.vocabulary.entity.Vocabulary;
 import org.example.collection.vocabulary.entity.Vocabulary_;
 import org.example.collection.vocabulary.exception.ResourceNotFoundException;
-import org.example.collection.vocabulary.model.request.VocabularyCreateRequest;
-import org.example.collection.vocabulary.model.request.VocabularyUpdateRequest;
+import org.example.collection.vocabulary.model.request.VocabularyRequest;
 import org.example.collection.vocabulary.model.response.PageResponse;
 import org.example.collection.vocabulary.model.response.VocabularyResponse;
 import org.example.collection.vocabulary.repository.VocabularyRepository;
@@ -36,24 +34,22 @@ public class VocabularyServiceImpl implements VocabularyService {
 	}
 
 	@Override
-	public PageResponse<VocabularyResponse> findAll(Pageable pageable, UUID collectionId, String name) {
+	public PageResponse<VocabularyResponse> findAll(Pageable pageable, UUID vocabularyId, String name) {
 		return VocabularyResponseMapper.INSTANCE.map(
 				vocabularyRepository.findAll(
-						equalManyToOne(Vocabulary_.collection, Collection_.id, collectionId).and(likeIgnoreCase(Vocabulary_.name, name)),
+						equalManyToOne(Vocabulary_.collection, Collection_.id, vocabularyId).and(likeIgnoreCase(Vocabulary_.name, name)),
 						pageable));
 	}
 
 	@Override
 	@Transactional
-	public UUID save(VocabularyCreateRequest request, UUID collectionId) {
-		Vocabulary vocabulary = VocabularyRequestMapper.INSTANCE.map(request);
-		vocabulary.setCollection(Collection.builder().id(collectionId).build());
-		return vocabularyRepository.save(vocabulary).getId();
+	public UUID save(VocabularyRequest request) {
+		return vocabularyRepository.save(VocabularyRequestMapper.INSTANCE.map(request)).getId();
 	}
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public UUID update(VocabularyUpdateRequest request) {
+	public UUID update(VocabularyRequest request) {
 		Vocabulary vocabulary = vocabularyRepository.findById(request.getId()).orElseThrow(
 				() -> new ResourceNotFoundException("Vocabulary with id " + request.getId() + " not found"));
 		vocabulary.setDescription(request.getDescription());

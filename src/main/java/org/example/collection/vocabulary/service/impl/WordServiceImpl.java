@@ -1,13 +1,11 @@
 package org.example.collection.vocabulary.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.example.collection.vocabulary.entity.Vocabulary;
 import org.example.collection.vocabulary.entity.Vocabulary_;
 import org.example.collection.vocabulary.entity.Word;
 import org.example.collection.vocabulary.entity.Word_;
 import org.example.collection.vocabulary.exception.ResourceNotFoundException;
-import org.example.collection.vocabulary.model.request.WordCreateRequest;
-import org.example.collection.vocabulary.model.request.WordUpdateRequest;
+import org.example.collection.vocabulary.model.request.WordRequest;
 import org.example.collection.vocabulary.model.response.PageResponse;
 import org.example.collection.vocabulary.model.response.WordResponse;
 import org.example.collection.vocabulary.repository.WordRepository;
@@ -43,14 +41,12 @@ public class WordServiceImpl implements WordService {
 	}
 
 	@Override
-	public UUID save(WordCreateRequest request, UUID vocabularyId) {
-		Word word = WordRequestMapper.INSTANCE.map(request);
-		word.setVocabulary(Vocabulary.builder().id(vocabularyId).build());
-		return wordRepository.save(word).getId();
+	public UUID save(WordRequest request) {
+		return wordRepository.save(WordRequestMapper.INSTANCE.map(request)).getId();
 	}
 
 	@Override
-	public UUID update(WordUpdateRequest request) {
+	public UUID update(WordRequest request) {
 		Word word = wordRepository.findById(request.getId()).orElseThrow(
 				() -> new ResourceNotFoundException("Word with id " + request.getId() + " not found"));
 		word.setDescription(request.getDescription());

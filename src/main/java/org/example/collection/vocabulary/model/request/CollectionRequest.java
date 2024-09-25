@@ -11,7 +11,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CollectionUpdateRequest {
+public class CollectionRequest {
 	@Size(max = 100)
 	@NotEmpty
 	private String name;
